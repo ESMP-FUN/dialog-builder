@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Minecraft Dialog Builder</title>
+<meta name="description" content="Build a Minecraft dialog screen visually and copy out the data pack JSON or the Paper plugin code.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect width='16' height='16' fill='%23222'/><rect x='3' y='4' width='10' height='2' fill='%2355FF55'/><rect x='3' y='8' width='10' height='2' fill='%23AAAAAA'/><rect x='3' y='12' width='6' height='2' fill='%23FFAA00'/></svg>">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <h1>Dialog Builder</h1>
+    <span class="brand-sub">for Minecraft Java 1.21.6+ &amp; Paper</span>
+  </div>
+
+  <div class="topbar-controls">
+    <label class="inline">
+      <span>Load an example</span>
+      <select id="examples">
+        <option value="">Pick one…</option>
+        <option value="settings">Settings screen</option>
+        <option value="survey">Every input type</option>
+        <option value="notice">Welcome notice</option>
+        <option value="confirm">Are you sure?</option>
+      </select>
+    </label>
+
+    <label class="inline">
+      <span>Size</span>
+      <input id="zoom" type="range" min="1.4" max="3.4" step="0.2" value="2">
+    </label>
+
+    <button id="reset" class="btn">Start over</button>
+  </div>
+</header>
+
+<main class="layout">
+
+  <aside class="panel panel-left" id="inspector-wrap">
+    <div id="inspector"></div>
+  </aside>
+
+  <section class="stage-wrap">
+    <div class="stage-hint">
+      <p>Drag a field from the right into the dialog, or just click it to drop one on the end.
+         Click anything here to change how it looks.</p>
+    </div>
+    <div id="stage" class="stage"></div>
+    <div class="stage-legend">
+      <p><strong>Why can't I put two things side by side?</strong> Because the game will not.
+         A dialog is one centred column: everything to read, then everything to fill in, then
+         a row of buttons. The only layout choice you have is the order, and how many buttons
+         fit on a row.</p>
+    </div>
+  </section>
+
+  <aside class="panel panel-right">
+    <div id="palette"></div>
+  </aside>
+
+</main>
+
+<section class="bottom">
+  <div class="bottom-head">
+    <div id="code-tabs" class="tabs">
+      <button data-tab="json" class="is-active">Data pack JSON</button>
+      <button data-tab="java">Java (Paper)</button>
+      <button data-tab="kotlin">Kotlin (Paper)</button>
+    </div>
+    <div class="bottom-actions">
+      <span id="issue-count" class="badge">&nbsp;</span>
+      <button id="copy" class="btn">Copy</button>
+      <button id="download" class="btn">Download</button>
+    </div>
+  </div>
+
+  <div class="bottom-body">
+    <pre id="code" class="code"></pre>
+    <div class="side">
+      <p id="code-note" class="code-note"></p>
+      <h3 class="panel-heading">Things worth knowing</h3>
+      <div id="issues" class="issues"></div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <p>Nothing here talks to a server — the buttons and fields are for looks, so you can see the
+     layout before you write any code. Your work is kept in this browser only.</p>
+</footer>
+
+<script src="js/minimessage.js"></script>
+<script src="js/model.js"></script>
+<script src="js/preview.js"></script>
+<script src="js/inspector.js"></script>
+<script src="js/export.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
