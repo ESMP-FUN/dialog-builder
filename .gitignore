@@ -1,2 +1,7 @@
 .firecrawl/
 .DS_Store
+
+# Saved reference copies of the Minecraft Wiki, kept locally for checking the
+# preview against the real screenshots. Not ours to republish.
+Dialog *Minecraft Wiki.html
+Dialog *Minecraft Wiki_files/

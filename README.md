@@ -18,7 +18,18 @@ Pages for the `main` branch, root folder. There is no build step.
 ## What a dialog actually is
 
 A dialog is the pop-up window the game shows when a plugin or data pack asks
-for one. It has four parts, always in this order, always in one centred column:
+for one. On screen it is three bands:
+
+- a **dark strip at the top** holding the title, with the game's own yellow
+  warning button beside it (clicking that in game leaves the world — you cannot
+  remove or change it);
+- a **middle area the blurred world shows straight through**, holding
+  everything to read, everything to fill in, and — on a multi-action dialog —
+  your grid of buttons;
+- a **dark strip at the bottom** holding the exit or confirm buttons, which is
+  also what Escape does.
+
+Within that, the order never changes:
 
 1. **The title** at the top.
 2. **Things to read** — paragraphs of text, and items shown in a slot.
@@ -77,18 +88,28 @@ The buttons and fields you build here are for looks only — this page has no
 server to talk to. Wiring a button up to something that happens is the part you
 do in your own code.
 
-## Layout details that are inferred, not confirmed
+## How close the preview is
 
-Two things about how the client draws inputs were taken from the format spec
-rather than measured against a running game, so treat them as close-but-check:
+The layout, the three bands, and each control's shape were checked against the
+screenshots on the wiki:
 
-- where a text field's label sits relative to its box, and
-- exactly how a multiple-choice button composes its `Label: Choice` face.
+- a text field puts its label **above** the box, centred;
+- a toggle puts its box **first**, label to the right;
+- a multiple-choice control is a button reading **`Label: Choice`**;
+- a slider is a track reading **`Label: value`**.
 
-Everything else — the ordering, the zones, the button grid, every field and
-every limit — comes straight from the format.
+The one thing this does not reproduce is the Minecraft font, which is not free
+to redistribute. The preview uses whichever pixel font your system has, falling
+back to a monospace, so text will be a little wider or narrower than in game.
+
+Item pictures are 16×16 textures from Mojang's
+[bedrock-samples](https://github.com/Mojang/bedrock-samples) resource pack,
+covering 110 common items. Any other item id still works — it just draws a
+lettered placeholder instead.
 
 ## Sources
 
 - [Minecraft Wiki: Dialog](https://minecraft.wiki/w/Dialog) — the format itself
 - [Paper: Dialogs](https://docs.papermc.io/paper/dev/dialogs) — the plugin API
+- [Paper javadocs](https://jd.papermc.io/paper/26.2/) — every builder method the
+  exports use was checked against the 26.2 API index

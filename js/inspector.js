@@ -88,6 +88,28 @@
     return sel;
   }
 
+  // A plain text box with suggestions attached, so any item id can still be
+  // typed — the list is only the subset the preview has a texture for.
+  function itemBox(b) {
+    var input = textbox(b.item_id, function (v) { b.item_id = v; },
+      { placeholder: 'minecraft:diamond' });
+
+    var listId = 'items-' + input.id;
+    var list = document.createElement('datalist');
+    list.id = listId;
+    Icons.list.forEach(function (id) {
+      var opt = document.createElement('option');
+      opt.value = 'minecraft:' + id;
+      list.appendChild(opt);
+    });
+
+    input.setAttribute('list', listId);
+    var wrap = el('div');
+    wrap.appendChild(input);
+    wrap.appendChild(list);
+    return wrap;
+  }
+
   function section(title) {
     var s = el('section', 'panel-section');
     s.appendChild(el('h3', 'panel-heading', title));
@@ -190,8 +212,9 @@
     } else {
       var i = section('Item');
       i.appendChild(field('Which item',
-        textbox(b.item_id, function (v) { b.item_id = v; }, { placeholder: 'minecraft:diamond' }),
-        'The item\'s id, for example minecraft:diamond or minecraft:netherite_pickaxe.'));
+        itemBox(b),
+        'The item\'s id, for example minecraft:diamond or minecraft:netherite_pickaxe. Any id '
+        + 'works in game; the ones suggested here are those the preview can draw a picture for.'));
       i.appendChild(field('How many', number(b.count, function (v) { b.count = v; }, { min: 1, max: 99 })));
       i.appendChild(field('Text beside it',
         textbox(b.description, function (v) { b.description = v; }, { multiline: true, rows: 3 }),

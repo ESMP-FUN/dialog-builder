@@ -213,10 +213,27 @@
         ? 'DialogBody.plainMessage(' + comp(b.contents, lang) + ', ' + b.width + ')'
         : 'DialogBody.plainMessage(' + comp(b.contents, lang) + ')';
     }
-    var stack = lang === 'kotlin'
-      ? 'ItemStack(Material.' + materialOf(b.item_id) + ', ' + b.count + ')'
-      : 'new ItemStack(Material.' + materialOf(b.item_id) + ', ' + b.count + ')';
-    return 'DialogBody.item(' + stack + ')';
+
+    var stack = (lang === 'kotlin' ? '' : 'new ')
+      + 'ItemStack(Material.' + materialOf(b.item_id) + ', ' + b.count + ')';
+
+    var plain = b.type === 'item' && MiniMessage.plain(b.description).trim();
+    var custom = plain || !b.show_decoration || !b.show_tooltip || b.width !== 16 || b.height !== 16;
+    if (!custom) return 'DialogBody.item(' + stack + ')';
+
+    // The long form takes the description and the display flags together.
+    var desc = plain
+      ? 'DialogBody.plainMessage(' + comp(b.description, lang) + ', ' + b.description_width + ')'
+      : 'null';
+
+    return 'DialogBody.item(\n'
+      + '    ' + stack + ',\n'
+      + '    ' + desc + ',\n'
+      + '    ' + (b.show_decoration ? 'true' : 'false') + ',\n'
+      + '    ' + (b.show_tooltip ? 'true' : 'false') + ',\n'
+      + '    ' + b.width + ',\n'
+      + '    ' + b.height + '\n'
+      + ')';
   }
 
   function materialOf(id) {

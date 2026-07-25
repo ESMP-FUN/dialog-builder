@@ -6,12 +6,17 @@
   'use strict';
 
   var STORAGE_KEY = 'mc-dialog-builder:v1';
+  var UI_KEY = 'mc-dialog-builder:ui';
 
   var state = {
     dialog: Model.blankDialog(),
     selectedId: null,
     tab: 'json'
   };
+
+  // Panel geometry lives apart from the document so clearing your work does
+  // not also reset the window you arranged.
+  var ui = { codeOpen: false, codeHeight: 320, zoom: 2 };
 
   var dom = {};
 
@@ -184,16 +189,17 @@
 
     // Existing elements can be dragged to reorder.
     Array.prototype.forEach.call(dom.stage.querySelectorAll('.mc-el[data-id]'), function (node) {
-      var element = Model.findElement(state.dialog, node.dataset.id);
-      if (!element) return;
-      // Footer buttons are fixed by the dialog type, so there is nothing to reorder.
-      var zone = element._kind === 'body' ? 'body'
-        : element._kind === 'input' ? 'inputs'
-        : (state.dialog.actions.indexOf(element) >= 0 ? 'actions' : null);
-      if (!zone) return;
+      var zone = zoneOf(node.dataset.id);
+      if (!zone) return; // footer buttons are fixed by the dialog type
 
       node.draggable = true;
       node.addEventListener('dragstart', function (e) {
+        // A drag that starts inside a live control (a slider, a text box) is
+        // that control's business, not a reorder.
+        if (e.target !== node && e.target.closest('.mc-textentry, .mc-slider')) {
+          e.preventDefault();
+          return;
+        }
         e.stopPropagation();
         e.dataTransfer.setData('text/plain', 'move:' + node.dataset.id);
         e.dataTransfer.effectAllowed = 'move';
@@ -201,6 +207,28 @@
       });
       node.addEventListener('dragend', endDrag);
     });
+  }
+
+  // Which reorderable list an element belongs to, or null when it is one of
+  // the buttons the dialog type owns.
+  function zoneOf(id) {
+    if (state.dialog.body.some(function (e) { return e._id === id; })) return 'body';
+    if (state.dialog.inputs.some(function (e) { return e._id === id; })) return 'inputs';
+    if (state.dialog.actions.some(function (e) { return e._id === id; })) return 'actions';
+    return null;
+  }
+
+  // Shifts an element one slot within its own list.
+  function nudge(id, delta) {
+    var zone = zoneOf(id);
+    if (!zone) return;
+    var list = state.dialog[zone];
+    var from = list.findIndex(function (e) { return e._id === id; });
+    var to = from + delta;
+    if (from < 0 || to < 0 || to >= list.length) return;
+    list.splice(to, 0, list.splice(from, 1)[0]);
+    state.selectedId = id;
+    render();
   }
 
   function listFor(kind) {
@@ -317,6 +345,10 @@
     Array.prototype.forEach.call(dom.tabs.querySelectorAll('button'), function (b) {
       b.classList.toggle('is-active', b.dataset.tab === state.tab);
     });
+
+    // No point regenerating code nobody can see; it is rebuilt on open.
+    if (!ui.codeOpen) return;
+
     dom.code.textContent = currentCode();
 
     dom.codeNote.textContent = {
@@ -327,9 +359,76 @@
     }[state.tab];
   }
 
+  /* ---- the code panel: collapsed by default, and resizable when open ---- */
+
+  function applyPanel() {
+    document.body.classList.toggle('code-open', ui.codeOpen);
+    dom.bottom.style.height = ui.codeOpen ? ui.codeHeight + 'px' : '';
+    dom.toggle.setAttribute('aria-expanded', ui.codeOpen ? 'true' : 'false');
+    dom.toggle.title = ui.codeOpen ? 'Hide the code' : 'Show the code';
+    dom.toggleIcon.textContent = ui.codeOpen ? '▾' : '▴';
+    dom.toggleText.textContent = ui.codeOpen ? 'Hide code' : 'Show code';
+  }
+
+  function setPanelOpen(open) {
+    ui.codeOpen = open;
+    applyPanel();
+    if (open) renderCode();
+    saveUi();
+  }
+
+  function wireResize() {
+    var startY = 0, startH = 0, dragging = false;
+
+    dom.grip.addEventListener('pointerdown', function (e) {
+      if (!ui.codeOpen) return;
+      dragging = true;
+      startY = e.clientY;
+      startH = dom.bottom.getBoundingClientRect().height;
+      dom.grip.setPointerCapture(e.pointerId);
+      document.body.classList.add('is-resizing');
+      e.preventDefault();
+    });
+
+    dom.grip.addEventListener('pointermove', function (e) {
+      if (!dragging) return;
+      // Dragging up grows the panel, so the delta is inverted.
+      var next = startH + (startY - e.clientY);
+      var max = Math.max(200, window.innerHeight - 220);
+      ui.codeHeight = Math.round(Math.max(140, Math.min(max, next)));
+      dom.bottom.style.height = ui.codeHeight + 'px';
+    });
+
+    function stop(e) {
+      if (!dragging) return;
+      dragging = false;
+      try { dom.grip.releasePointerCapture(e.pointerId); } catch (err) { /* already gone */ }
+      document.body.classList.remove('is-resizing');
+      saveUi();
+    }
+    dom.grip.addEventListener('pointerup', stop);
+    dom.grip.addEventListener('pointercancel', stop);
+
+    // Double-clicking the grip is a quick way back to a sensible height.
+    dom.grip.addEventListener('dblclick', function () {
+      ui.codeHeight = 320;
+      dom.bottom.style.height = ui.codeHeight + 'px';
+      saveUi();
+    });
+  }
+
   function wireCodePanel() {
+    dom.toggle.addEventListener('click', function () { setPanelOpen(!ui.codeOpen); });
+    wireResize();
+
     Array.prototype.forEach.call(dom.tabs.querySelectorAll('button'), function (b) {
-      b.addEventListener('click', function () { state.tab = b.dataset.tab; renderCode(); });
+      b.addEventListener('click', function () {
+        state.tab = b.dataset.tab;
+        // Picking a language is a request to see it.
+        if (!ui.codeOpen) setPanelOpen(true);
+        else renderCode();
+        saveUi();
+      });
     });
 
     dom.copy.addEventListener('click', function () {
@@ -359,6 +458,19 @@
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state.dialog));
     } catch (e) { /* private browsing, or storage full — not worth interrupting for */ }
+  }
+
+  function saveUi() {
+    ui.tab = state.tab;
+    try { localStorage.setItem(UI_KEY, JSON.stringify(ui)); } catch (e) { /* as above */ }
+  }
+
+  function loadUi() {
+    try {
+      var raw = localStorage.getItem(UI_KEY);
+      if (raw) Object.assign(ui, JSON.parse(raw));
+    } catch (e) { /* keep the defaults */ }
+    if (ui.tab) state.tab = ui.tab;
   }
 
   // Ids are reassigned on load so a restored document can never collide with
@@ -517,9 +629,13 @@
     });
 
     dom.zoom.addEventListener('input', function () {
-      Preview.setZoom(Number(dom.zoom.value));
-      render();
+      ui.zoom = Number(dom.zoom.value);
+      Preview.setZoom(ui.zoom);
+      drawStage();
+      saveUi();
     });
+
+    dom.tips.addEventListener('click', function () { Tips.open(); });
   }
 
   /* ---- render ---- */
@@ -529,7 +645,27 @@
   // drawing them, so "still exists" has to mean "still on screen".
   function drawStage() {
     dom.stage.textContent = '';
-    dom.stage.appendChild(Preview.render(state.dialog, { selectedId: state.selectedId }));
+    dom.stage.appendChild(Preview.render(state.dialog, {
+      selectedId: state.selectedId,
+      hooks: {
+        // A live control was used. Redraw the preview and the code, but leave
+        // the options panel alone so a half-typed value keeps its focus.
+        edited: function (id, keepFocus) {
+          if (keepFocus) { renderIssues(); renderCode(); save(); return; }
+          state.selectedId = id;
+          drawStage();
+          renderIssues();
+          renderCode();
+          save();
+        },
+        move: nudge,
+        remove: function (id) {
+          Model.removeElement(state.dialog, id);
+          if (state.selectedId === id) state.selectedId = null;
+          render();
+        }
+      }
+    }));
     wireZones();
     return !state.selectedId || !!dom.stage.querySelector('[data-id="' + state.selectedId + '"]');
   }
@@ -576,6 +712,16 @@
     dom.examples = document.getElementById('examples');
     dom.reset = document.getElementById('reset');
     dom.zoom = document.getElementById('zoom');
+    dom.tips = document.getElementById('tips');
+    dom.bottom = document.getElementById('bottom');
+    dom.grip = document.getElementById('grip');
+    dom.toggle = document.getElementById('code-toggle');
+    dom.toggleIcon = document.getElementById('code-toggle-icon');
+    dom.toggleText = document.getElementById('code-toggle-text');
+
+    loadUi();
+    dom.zoom.value = ui.zoom;
+    Preview.setZoom(ui.zoom);
 
     var saved = load();
     if (saved) state.dialog = saved;
@@ -583,6 +729,8 @@
     wireSelection();
     wireCodePanel();
     wireToolbar();
+    applyPanel();
     render();
+    Tips.openIfFirstVisit();
   });
 })();
