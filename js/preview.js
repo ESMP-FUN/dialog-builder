@@ -309,11 +309,13 @@
 
     // The warning button. In game it leaves the world and returns to the
     // title screen — it is always there and cannot be turned off.
-    var warn = el('button', 'mc-warning');
-    warn.title = 'Always shown by the game, to the right of the title. Clicking it in game '
-      + 'leaves the world and returns to the title screen. You cannot remove or change it.';
-    warn.setAttribute('aria-label', 'Warning button');
-    warn.appendChild(warningIcon());
+    var warn = McIcons.button('warning', 'mc-warning');
+    Tooltip.attach(warn, {
+      title: 'The game puts this here',
+      body: 'Every dialog shows this button to the right of its title. Clicking it in game '
+        + 'leaves the world and returns to the title screen.\n\n'
+        + 'You cannot move it, change it or turn it off, so there is nothing to set here.'
+    });
     titleRow.appendChild(warn);
 
     header.appendChild(titleRow);
@@ -389,28 +391,6 @@
     }
 
     return screen;
-  }
-
-  function warningIcon() {
-    var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    svg.setAttribute('viewBox', '0 0 16 16');
-    svg.setAttribute('width', '16');
-    svg.setAttribute('height', '16');
-
-    var tri = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    tri.setAttribute('d', 'M8 1 L15 14 L1 14 Z');
-    tri.setAttribute('fill', '#FFC61E');
-    tri.setAttribute('stroke', '#1A1A1A');
-    tri.setAttribute('stroke-width', '1.4');
-    tri.setAttribute('stroke-linejoin', 'miter');
-    svg.appendChild(tri);
-
-    var bang = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    bang.setAttribute('d', 'M7.1 5.2h1.8v4.4H7.1z M7.1 10.6h1.8v1.8H7.1z');
-    bang.setAttribute('fill', '#1A1A1A');
-    svg.appendChild(bang);
-
-    return svg;
   }
 
   function stubGrid(dialog, names, note) {

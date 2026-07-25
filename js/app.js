@@ -638,6 +638,22 @@
     dom.tips.addEventListener('click', function () { Tips.open(); });
   }
 
+  /* ---- stage footer ---- */
+
+  // The one thing people ask first, tucked into a button so it cannot get in
+  // the way of a tall dialog.
+  function wireStageFoot() {
+    var info = McIcons.button('info');
+    Tooltip.attach(info, {
+      title: 'Why can\'t I put two things side by side?',
+      body: 'Because the game will not. A dialog is one centred column: everything to read, '
+        + 'then everything to fill in, then the buttons.\n\n'
+        + 'The only layout choices you have are the order things come in, and how many '
+        + 'buttons fit on a row.'
+    });
+    dom.stageFoot.appendChild(info);
+  }
+
   /* ---- fonts ---- */
 
   // Which text field a font tag should wrap, for whatever is selected.
@@ -746,6 +762,7 @@
     dom.zoom = document.getElementById('zoom');
     dom.tips = document.getElementById('tips');
     dom.fonts = document.getElementById('fonts');
+    dom.stageFoot = document.getElementById('stage-foot');
     dom.bottom = document.getElementById('bottom');
     dom.grip = document.getElementById('grip');
     dom.toggle = document.getElementById('code-toggle');
@@ -762,6 +779,7 @@
     wireSelection();
     wireCodePanel();
     wireToolbar();
+    wireStageFoot();
     applyPanel();
     FontPanel.init(dom.fonts, applyFont);
     render();
