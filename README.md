@@ -12,6 +12,19 @@ you press **Start over**.
 
 Open `index.html`. That is all.
 
+The one thing that is generated rather than hand-written is the rune sprite
+data in `js/glyphs.js` and `assets/fonts/`. It is derived from the labelled
+alphabet charts in `fonts/` and only needs rebuilding if those change:
+
+```bash
+npm i pngjs && node tools/build-glyphs.js
+```
+
+The tool cross-checks each rune against its printed label and refuses to write
+anything if the counts disagree, so a bad read fails loudly instead of shipping
+runes under the wrong letters. `VERBOSE=1` reports how cleanly the runes
+separated.
+
 To put it online, push this folder to a GitHub repository and turn on GitHub
 Pages for the `main` branch, root folder. There is no build step.
 
@@ -66,6 +79,17 @@ four of its own:
 | `minecraft:uniform` | GNU Unifont, the even-width fallback for unusual characters |
 | `minecraft:alt` | Standard Galactic Alphabet — the enchanting table runes |
 | `minecraft:illageralt` | Illager runes, which the game never uses itself |
+
+All four are drawn truthfully in the preview. The two rune fonts are picture
+fonts inside the game with no font file to hand a browser, so each rune is a
+slice of a sprite strip drawn as a CSS mask — which means runes take colours
+and gradients exactly like ordinary text.
+
+Their coverage is limited, and the preview shows this rather than hiding it:
+Standard Galactic Alphabet has `a`–`z` only, Illageralt adds `1`–`9` and
+`? ! . ,`. Capitals reuse the lower-case rune, since neither font has a notion
+of case. Anything else — spaces, `0`, other punctuation — stays in the normal
+font so the text remains readable.
 
 Write `<font:minecraft:uniform>text</font>`, or select something and press
 **Use here** in the Fonts panel.

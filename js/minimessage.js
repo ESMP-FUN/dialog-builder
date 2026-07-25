@@ -356,6 +356,13 @@
           if (!Fonts.isFaithful(s.font)) span.classList.add('mm-unfaithful');
         }
 
+        // The rune fonts have no font file — each character is a sprite, so
+        // the text is swapped for pictures rather than restyled.
+        if (s.font && global.GlyphFont && GlyphFont.has(s.font)) {
+          span.textContent = '';
+          span.appendChild(GlyphFont.render(chunk, s.font, shadowOf(s.color)));
+        }
+
         // Bold is not a heavier face in Minecraft — the glyph is simply drawn
         // a second time one pixel to the right. Same for the shadow underneath.
         var layers = [];

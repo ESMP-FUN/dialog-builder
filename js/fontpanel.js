@@ -40,9 +40,11 @@
     else if (f.faithful === false) head.appendChild(el('span', 'font-pill is-warn', 'approximate'));
     card.appendChild(head);
 
-    var sample = el('div', 'font-sample', 'The quick brown fox 0123');
-    sample.style.fontFamily = Fonts.familyFor(f.key);
-    Fonts.ensureLoaded(f.key);
+    // Rendered through the same pipeline the dialog uses, so the card shows
+    // exactly what the preview will.
+    var sample = el('div', 'font-sample');
+    MiniMessage.into(sample, '<font:' + f.key + '>'
+      + (f.sample || 'The quick brown fox 0123') + '</font>');
     card.appendChild(sample);
 
     card.appendChild(el('code', 'font-key', f.key));

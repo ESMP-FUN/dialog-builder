@@ -1,6 +1,15 @@
 .firecrawl/
 .DS_Store
 
+# Only tools/build-glyphs.js needs a package (pngjs). The site itself has no
+# dependencies and no build step.
+node_modules/
+
+# The 800x400 alphabet renders. Superseded by the labelled charts, which are
+# complete and say which rune belongs to which letter.
+fonts/Minecraft - IllagerAlt.png
+fonts/Minecraft - Standard Galactic Alphabet.png
+
 # Saved reference copies of the Minecraft Wiki, kept locally for checking the
 # preview against the real screenshots. Not ours to republish.
 Dialog *Minecraft Wiki.html

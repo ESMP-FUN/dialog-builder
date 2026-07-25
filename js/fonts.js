@@ -44,19 +44,22 @@
       key: 'minecraft:alt',
       name: 'Standard Galactic Alphabet',
       family: STACK,
-      blurb: 'The runes on the enchanting table. Readable as a novelty, not as words.',
-      faithful: false,
-      why: 'This is a picture-based font inside the game with no font file to borrow, so '
-        + 'the preview shows ordinary letters. In game your text really will come out as runes.'
+      blurb: 'The runes on the enchanting table. Covers the letters a to z — anything '
+        + 'else, including numbers, stays in the normal font.',
+      faithful: true,
+      sample: 'the enchanting table',
+      // Not a font file but a set of pictures, one per letter.
+      glyphs: true
     },
     {
       key: 'minecraft:illageralt',
       name: 'Illageralt',
       family: STACK,
-      blurb: 'Illager runes. The game never uses these itself, but the font is there.',
-      faithful: false,
-      why: 'Another picture-based font with no file to borrow, so the preview shows '
-        + 'ordinary letters. In game your text really will come out as runes.'
+      blurb: 'Illager runes. The game never uses these itself, but the font is there. '
+        + 'Covers a to z, 1 to 9 and ? ! . , — anything else stays in the normal font.',
+      faithful: true,
+      sample: 'raid incoming 1234',
+      glyphs: true
     }
   ];
 
