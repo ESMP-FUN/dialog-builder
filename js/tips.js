@@ -74,6 +74,12 @@
       title: 'A new line',
       snippet: 'First line<newline>Second line',
       note: 'Prefer one full paragraph over many short lines — see the trap below.'
+    },
+    {
+      title: 'A different font',
+      snippet: '<font:minecraft:uniform>even-width text</font>',
+      note: 'Java Edition has four fonts of its own. Anything beyond those has to come from '
+        + 'a resource pack — the Fonts panel on the right will build you one.'
     }
   ];
 
@@ -143,6 +149,27 @@
       title: 'Text boxes only hold 32 characters',
       body: 'That is the default maximum length, and it is far shorter than most people '
         + 'expect. If you are asking for anything longer than a nickname, raise it.'
+    },
+    {
+      title: 'A custom font only works if the player has the pack',
+      body: 'Java Edition has four fonts built in: the normal one, GNU Unifont, the '
+        + 'enchanting-table runes and the illager runes. Those work for everyone, always.\n\n'
+        + 'Any other font has to be delivered in a resource pack. If a player does not have '
+        + 'it, the game does not complain — it quietly draws your text in the normal font '
+        + 'instead. So never rely on a custom font to make something readable or make sense; '
+        + 'treat it as decoration on top of text that already works.\n\n'
+        + 'Drop a .ttf into the Fonts panel and the builder will hand you back a working pack '
+        + 'with the font, the font definition and instructions already in it.',
+      code: {
+        json: '{\n'
+          + '  "providers": [\n'
+          + '    { "type": "ttf", "file": "mypack:fancy.ttf",\n'
+          + '      "shift": [0, 0], "size": 11, "oversample": 2 }\n'
+          + '  ]\n'
+          + '}'
+      },
+      after: 'That file goes at assets/mypack/font/fancy.json, and the .ttf beside it in the '
+        + 'same folder. Then the name "mypack:fancy" is real and your text can ask for it.'
     },
     {
       title: 'Only multi-action lets you place your own buttons',

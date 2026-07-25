@@ -5,3 +5,23 @@
 # preview against the real screenshots. Not ours to republish.
 Dialog *Minecraft Wiki.html
 Dialog *Minecraft Wiki_files/
+Font *Minecraft Wiki.html
+Font *Minecraft Wiki_files/
+
+# Mojang's website branding fonts. They are not Java Edition dialog fonts, so
+# the builder has no use for them, and Sixteen alone is 19 MB.
+fonts/Minecraft-Five*
+fonts/MinecraftFive-*
+fonts/MinecraftSixteen*
+fonts/MinecraftTen*
+fonts/seven.ttf
+
+# Unifont variants the game does not use for minecraft:uniform.
+fonts/unifont_jp-*
+fonts/unifont_upper-*
+
+# Synthesised by the browser from the regular face, the same way the game
+# synthesises them. Shipping them would only add weight.
+fonts/MinecraftDefault-Bold.ttf
+fonts/MinecraftDefault-BoldItalic.ttf
+fonts/MinecraftDefault-Italic.ttf

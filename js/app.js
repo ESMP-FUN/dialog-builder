@@ -638,6 +638,38 @@
     dom.tips.addEventListener('click', function () { Tips.open(); });
   }
 
+  /* ---- fonts ---- */
+
+  // Which text field a font tag should wrap, for whatever is selected.
+  function textTargetOf(element) {
+    if (!element) return null;
+    if (element._kind === 'body') {
+      return element.type === 'plain_message' ? 'contents' : 'description';
+    }
+    if (element._kind === 'input') return 'label';
+    if (element._kind === 'button') return 'label';
+    return null;
+  }
+
+  function applyFont(key) {
+    var element = state.selectedId ? Model.findElement(state.dialog, state.selectedId) : null;
+    var prop = textTargetOf(element);
+
+    if (!prop) {
+      // Nothing selected, so the title is the sensible default.
+      element = state.dialog;
+      prop = 'title';
+    }
+
+    var current = String(element[prop] || '');
+    // Replace an outer font tag rather than nesting a second one inside it.
+    var existing = current.match(/^<font:[^>]+>([\s\S]*)<\/font>$/);
+    var inner = existing ? existing[1] : current;
+
+    element[prop] = '<font:' + key + '>' + inner + '</font>';
+    render();
+  }
+
   /* ---- render ---- */
 
   // Redraws the preview and reports whether the selected element survived.
@@ -713,6 +745,7 @@
     dom.reset = document.getElementById('reset');
     dom.zoom = document.getElementById('zoom');
     dom.tips = document.getElementById('tips');
+    dom.fonts = document.getElementById('fonts');
     dom.bottom = document.getElementById('bottom');
     dom.grip = document.getElementById('grip');
     dom.toggle = document.getElementById('code-toggle');
@@ -730,6 +763,7 @@
     wireCodePanel();
     wireToolbar();
     applyPanel();
+    FontPanel.init(dom.fonts, applyFont);
     render();
     Tips.openIfFirstVisit();
   });

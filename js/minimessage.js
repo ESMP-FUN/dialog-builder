@@ -141,6 +141,14 @@
       return closing ? { kind: 'close', name: 'rainbow' } : { kind: 'open', name: 'rainbow' };
     }
 
+    // <font:minecraft:uniform> and <font:uniform> mean the same thing; the
+    // argument split ate the colon, so put it back.
+    if (name === 'font') {
+      if (closing) return { kind: 'close', name: 'font' };
+      if (!args.length || !args[0]) return null;
+      return { kind: 'open', name: 'font', font: args.join(':') };
+    }
+
     if (name === 'click') {
       if (closing) return { kind: 'close', name: 'click' };
       if (args.length < 2) return null;
@@ -160,7 +168,7 @@
   function blankStyle() {
     return {
       color: null, bold: false, italic: false, underlined: false,
-      strikethrough: false, obfuscated: false, click: null, hover: null
+      strikethrough: false, obfuscated: false, click: null, hover: null, font: null
     };
   }
 
@@ -168,7 +176,7 @@
     return {
       color: s.color, bold: s.bold, italic: s.italic, underlined: s.underlined,
       strikethrough: s.strikethrough, obfuscated: s.obfuscated,
-      click: s.click, hover: s.hover
+      click: s.click, hover: s.hover, font: s.font
     };
   }
 
@@ -282,6 +290,8 @@
             push(function (s) { s.click = { action: tok.action, value: tok.value }; });
           } else if (tok.name === 'hover') {
             push(function (s) { s.hover = tok.value; });
+          } else if (tok.name === 'font') {
+            push(function (s) { s.font = tok.font; });
           } else if (tok.name === 'gradient' || tok.name === 'rainbow') {
             push(function () {});
             spans.push({ name: tok.name, stops: tok.stops || [], start: runs.length });
@@ -301,6 +311,21 @@
   }
 
   /* ---- consumers ---- */
+
+  /*
+   * The game draws text shadow as a copy of the glyph with red, green and blue
+   * each divided by four, offset south-east by an eighth of the character.
+   * Doing the same here rather than using one fixed grey means coloured text
+   * gets a coloured shadow, as it does in game.
+   */
+  function shadowOf(hex) {
+    var c = hex || '#FFFFFF';
+    var out = '#';
+    for (var i = 1; i < 7; i += 2) {
+      out += ('0' + Math.floor(parseInt(c.slice(i, i + 2), 16) / 4).toString(16)).slice(-2);
+    }
+    return out;
+  }
 
   // Builds real DOM nodes rather than an HTML string. Preview text comes from
   // whatever the user typed, so keeping it out of the HTML parser entirely
@@ -322,9 +347,27 @@
           + (s.click || s.hover ? ' mm-interactive' : '');
         span.textContent = chunk;
 
+        var colour = s.color || '#FFFFFF';
         if (s.color) span.style.color = s.color;
-        if (s.bold) span.style.fontWeight = '700';
+
+        if (s.font && global.Fonts) {
+          span.style.fontFamily = Fonts.familyFor(s.font);
+          Fonts.ensureLoaded(s.font);
+          if (!Fonts.isFaithful(s.font)) span.classList.add('mm-unfaithful');
+        }
+
+        // Bold is not a heavier face in Minecraft — the glyph is simply drawn
+        // a second time one pixel to the right. Same for the shadow underneath.
+        var layers = [];
+        if (s.bold) layers.push('1px 0 0 ' + colour);
+        layers.push('0.125em 0.125em 0 ' + shadowOf(s.color));
+        if (s.bold) layers.push('calc(1px + 0.125em) 0.125em 0 ' + shadowOf(s.color));
+        span.style.textShadow = layers.join(', ');
+
+        // No italic face exists, so the browser shears the glyphs — which is
+        // exactly what the game does.
         if (s.italic) span.style.fontStyle = 'italic';
+
         var deco = [];
         if (s.underlined) deco.push('underline');
         if (s.strikethrough) deco.push('line-through');
@@ -367,6 +410,7 @@
       if (s.underlined) o.underlined = true;
       if (s.strikethrough) o.strikethrough = true;
       if (s.obfuscated) o.obfuscated = true;
+      if (s.font) o.font = global.Fonts ? Fonts.normalise(s.font) : s.font;
       if (s.click) {
         var ev = { action: s.click.action };
         if (s.click.action === 'open_url') ev.url = s.click.value;

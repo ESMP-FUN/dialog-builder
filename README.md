@@ -55,6 +55,36 @@ produce.
 Only **multi-action** lets you place buttons yourself. The others build their
 own, which is why the Button card in the palette greys out on those.
 
+## Fonts
+
+Any piece of text in a dialog can ask for a different font. Java Edition has
+four of its own:
+
+| Key | What it is |
+| --- | --- |
+| `minecraft:default` | Mojangles, the pixel font almost everything uses |
+| `minecraft:uniform` | GNU Unifont, the even-width fallback for unusual characters |
+| `minecraft:alt` | Standard Galactic Alphabet — the enchanting table runes |
+| `minecraft:illageralt` | Illager runes, which the game never uses itself |
+
+Write `<font:minecraft:uniform>text</font>`, or select something and press
+**Use here** in the Fonts panel.
+
+Anything beyond those four has to be delivered in a resource pack. Drop a
+`.ttf` or `.otf` onto the Fonts panel, give it a name like `mypack:fancy`, and
+the builder will hand you back a working pack — the font, the font definition
+at `assets/mypack/font/fancy.json`, a `pack.mcmeta` and a short README, zipped
+and ready to load. Your font never leaves your browser.
+
+Worth knowing: if a player does not have the pack, the game does not complain.
+It quietly falls back to the normal font. So treat a custom font as decoration
+on top of text that already reads correctly without it.
+
+The preview draws the first two fonts truthfully — Mojangles ships with the
+tool, Unifont is fetched only when something actually uses it. The two rune
+fonts are pictures inside the game with no font file to borrow, so the preview
+shows ordinary letters and says so on the card.
+
 ## Traps worth knowing about
 
 These are the things that cost real time to discover, so the builder warns you
@@ -98,9 +128,12 @@ screenshots on the wiki:
 - a multiple-choice control is a button reading **`Label: Choice`**;
 - a slider is a track reading **`Label: value`**.
 
-The one thing this does not reproduce is the Minecraft font, which is not free
-to redistribute. The preview uses whichever pixel font your system has, falling
-back to a monospace, so text will be a little wider or narrower than in game.
+Text is drawn the way the game draws it, too: the shadow is the glyph's own
+colour with red, green and blue divided by four, offset an eighth of a
+character down and right; bold is the glyph drawn twice a pixel apart rather
+than a heavier face; italic is a shear. That is why only the regular weight of
+Mojangles ships here — the game synthesises the other two, and so does the
+browser.
 
 Item pictures are 16×16 textures from Mojang's
 [bedrock-samples](https://github.com/Mojang/bedrock-samples) resource pack,
@@ -110,6 +143,17 @@ lettered placeholder instead.
 ## Sources
 
 - [Minecraft Wiki: Dialog](https://minecraft.wiki/w/Dialog) — the format itself
+- [Minecraft Wiki: Font](https://minecraft.wiki/w/Font) — the font providers, and
+  how the game draws shadow, bold and italic
+- [Minecraft Wiki: Pack format](https://minecraft.wiki/w/Pack_format) — the
+  version numbers the generated resource pack declares
 - [Paper: Dialogs](https://docs.papermc.io/paper/dev/dialogs) — the plugin API
 - [Paper javadocs](https://jd.papermc.io/paper/26.2/) — every builder method the
   exports use was checked against the 26.2 API index
+
+## Credits
+
+Mojangles is © Mojang AB. GNU Unifont is by Roman Czyborra, Paul Hardy and
+contributors, under the GNU GPL with font embedding exception / SIL OFL. Item
+textures come from Mojang's
+[bedrock-samples](https://github.com/Mojang/bedrock-samples) resource pack.

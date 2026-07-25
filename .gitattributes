@@ -1,0 +1,8 @@
+# Never let line-ending conversion touch binary assets — a single CRLF
+# rewrite inside a font or a texture corrupts the file silently.
+*.ttf  binary
+*.otf  binary
+*.woff binary
+*.png  binary
+*.webp binary
+*.zip  binary

@@ -4,6 +4,16 @@
      everything else is the builder wrapped around it
    --------------------------------------------------------------- */
 
+/* Mojangles, the font the game uses for nearly everything. Bold and italic
+   faces are deliberately not loaded: the game synthesises both (bold by
+   drawing the glyph twice, italic by shearing it), and the browser does the
+   same when only a regular face exists. */
+@font-face {
+  font-family: "MC Default";
+  src: url("fonts/MinecraftDefault-Regular.ttf") format("truetype");
+  font-display: swap;
+}
+
 :root {
   --bg: #14161a;
   --bg-panel: #1b1e24;
@@ -19,9 +29,7 @@
   --error: #ef7a72;
   --font: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --mono: ui-monospace, "Cascadia Mono", Consolas, "Liberation Mono", monospace;
-  /* Nothing here ships a Minecraft font — this is the closest widely
-     available pixel-ish stack. */
-  --mc-font: "Minecraft", "Monocraft", "Silkscreen", ui-monospace, Consolas, monospace;
+  --mc-font: "MC Default", ui-monospace, Consolas, monospace;
 }
 
 * { box-sizing: border-box; }
@@ -213,7 +221,9 @@ textarea { resize: vertical; font-family: var(--mono); font-size: 12px; line-hei
   flex-direction: column;
   font-family: var(--mc-font);
   color: #fff;
-  text-shadow: 2px 2px 0 #3f3f3f;
+  /* Fallback for text that does not go through MiniMessage; styled runs
+     compute their own shadow from their own colour, as the game does. */
+  text-shadow: 0.125em 0.125em 0 #3f3f3f;
   font-size: 13px;
   line-height: 1.5;
   min-width: 0;
@@ -416,6 +426,70 @@ textarea { resize: vertical; font-family: var(--mono); font-size: 12px; line-hei
 
 .mm-obf { filter: blur(1.4px); opacity: 0.85; }
 .mm-interactive { text-decoration: underline dotted; cursor: help; }
+/* A font the preview cannot draw truthfully — see the Fonts panel. */
+.mm-unfaithful { outline: 1px dotted #e8c26866; outline-offset: 1px; }
+
+/* ---- fonts panel ---- */
+
+.font-card {
+  border: 1px solid var(--line); border-radius: 7px;
+  padding: 9px 10px; margin-bottom: 8px; background: var(--bg-raise);
+}
+.font-card.is-approx { border-style: dashed; }
+
+.font-card-head { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
+.font-card-head strong { font-size: 12.5px; }
+
+.font-pill {
+  font-size: 9px; text-transform: uppercase; letter-spacing: 0.06em;
+  padding: 2px 5px; border-radius: 10px;
+  background: var(--accent-dim); color: #fff;
+}
+.font-pill.is-warn { background: #6b5a2a; color: var(--warn); }
+
+.font-sample {
+  background: #0d0f13; border: 1px solid var(--line-soft); border-radius: 5px;
+  padding: 7px 8px; margin-bottom: 6px;
+  font-size: 14px; color: #fff; text-shadow: 0.125em 0.125em 0 #3f3f3f;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+.font-key {
+  display: block; font-family: var(--mono); font-size: 10.5px;
+  color: var(--accent); margin-bottom: 5px; word-break: break-all;
+}
+.font-blurb { margin: 0; font-size: 11px; line-height: 1.5; color: var(--text-dim); }
+.font-why {
+  margin: 6px 0 0; font-size: 10.5px; line-height: 1.5; color: var(--warn);
+  border-left: 2px solid #e8c26855; padding-left: 7px;
+}
+.font-error { margin: 6px 0 0; font-size: 11px; line-height: 1.5; color: var(--error); }
+
+.font-actions { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
+
+.font-copy {
+  background: none; border: 1px solid var(--line); color: var(--text-dim);
+  border-radius: 5px; padding: 4px 8px;
+  font: inherit; font-size: 10.5px; cursor: pointer;
+}
+.font-copy:hover { color: var(--text); border-color: var(--accent-dim); }
+.font-copy.is-done { color: var(--ok); border-color: #6dd58c66; }
+.font-copy.is-danger:hover { color: var(--error); border-color: var(--error); }
+
+.font-drop {
+  display: flex; flex-direction: column; gap: 4px;
+  border: 1px dashed var(--line); border-radius: 7px;
+  padding: 12px 10px; text-align: center; cursor: pointer;
+  background: #00000026;
+}
+.font-drop:hover, .font-drop.is-over { border-color: var(--accent); background: #63b3ff14; }
+.font-drop strong { font-size: 12px; }
+
+.font-drop-form {
+  border: 1px solid var(--accent-dim); border-radius: 7px;
+  padding: 10px; background: #63b3ff0f;
+}
+.font-drop-form .control { margin-top: 6px; }
 
 /* ---- drag feedback ---- */
 
