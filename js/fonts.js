@@ -229,6 +229,35 @@
     }, null, 2);
   }
 
+  /*
+   * pack.mcmeta.
+   *
+   * 63 is the resource pack format for 1.21.6, the version dialogs arrived in.
+   * A ceiling of 999 means this never needs touching again for a version bump.
+   *
+   * Both pairs of fields are here on purpose. 1.21.9 replaced pack_format and
+   * supported_formats with min_format and max_format, but kept reading the old
+   * pair for packs that still support older releases — and the cut-off for a
+   * resource pack is format 65. Since 63 is below that, the old fields are not
+   * merely allowed, they are required; drop them and the pack stops loading on
+   * 1.21.6 to 1.21.8. The two ranges have to agree, so they are built from the
+   * same numbers.
+   */
+  var MIN_FORMAT = 63;
+  var MAX_FORMAT = 999;
+
+  function packMeta(entry) {
+    return JSON.stringify({
+      pack: {
+        description: entry.key + ' — font for Minecraft dialogs',
+        pack_format: MIN_FORMAT,
+        supported_formats: { min_inclusive: MIN_FORMAT, max_inclusive: MAX_FORMAT },
+        min_format: MIN_FORMAT,
+        max_format: MAX_FORMAT
+      }
+    }, null, 2);
+  }
+
   function packPaths(entry) {
     var parts = entry.key.split(':');
     var ns = parts[0];
@@ -253,7 +282,9 @@
     load: load,
     storageFull: storageFull,
     providerJson: providerJson,
+    packMeta: packMeta,
     packPaths: packPaths,
+    formatRange: function () { return { min: MIN_FORMAT, max: MAX_FORMAT }; },
     onChange: onChange
   };
 })(window);

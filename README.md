@@ -76,6 +76,28 @@ the builder will hand you back a working pack — the font, the font definition
 at `assets/mypack/font/fancy.json`, a `pack.mcmeta` and a short README, zipped
 and ready to load. Your font never leaves your browser.
 
+The generated `pack.mcmeta` declares a version range of 63 to 999, so it keeps
+loading as new Minecraft versions come out and never needs editing:
+
+```json
+{
+  "pack": {
+    "description": "mypack:fancy — font for Minecraft dialogs",
+    "pack_format": 63,
+    "supported_formats": { "min_inclusive": 63, "max_inclusive": 999 },
+    "min_format": 63,
+    "max_format": 999
+  }
+}
+```
+
+Both pairs are there deliberately. 1.21.9 replaced `pack_format` and
+`supported_formats` with `min_format` and `max_format`, but kept reading the
+old pair for packs that still support older releases — and for a resource pack
+that cut-off is format 65. Since dialogs arrived in 1.21.6, whose resource pack
+format is 63, the old fields are not merely allowed but required. Drop them and
+the pack silently stops loading on 1.21.6 through 1.21.8.
+
 Worth knowing: if a player does not have the pack, the game does not complain.
 It quietly falls back to the normal font. So treat a custom font as decoration
 on top of text that already reads correctly without it.

@@ -79,18 +79,6 @@
   function downloadPack(entry) {
     var paths = Fonts.packPaths(entry);
 
-    var mcmeta = JSON.stringify({
-      pack: {
-        // 63 is the resource pack format for 1.21.6, the version dialogs
-        // arrived in. "supported_formats" keeps it loading on later versions
-        // (64 for 1.21.7-1.21.8, 69 for 1.21.9-1.21.10, 75 for 1.21.11)
-        // instead of pinning the pack to one release.
-        pack_format: 63,
-        supported_formats: { min_inclusive: 63, max_inclusive: 99 },
-        description: entry.key + ' — font for Minecraft dialogs'
-      }
-    }, null, 2);
-
     var readme = 'This pack adds one font: ' + entry.key + '\n\n'
       + 'To use it:\n'
       + '  1. Drop this .zip into your server\'s resource pack, or into\n'
@@ -102,7 +90,7 @@
       + 'game quietly falls back to the normal font.\n';
 
     var blob = Zip.build([
-      { name: 'pack.mcmeta', bytes: Zip.textBytes(mcmeta) },
+      { name: 'pack.mcmeta', bytes: Zip.textBytes(Fonts.packMeta(entry)) },
       { name: 'README.txt', bytes: Zip.textBytes(readme) },
       { name: paths.json, bytes: Zip.textBytes(Fonts.providerJson(entry)) },
       { name: paths.font, bytes: Zip.dataUrlBytes(entry.dataUrl) }
