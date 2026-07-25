@@ -246,10 +246,21 @@
   var MIN_FORMAT = 63;
   var MAX_FORMAT = 999;
 
+  /*
+   * The description shows under the pack's name in the resource pack list and
+   * accepts the old section-sign colour codes, so the font's name can stand
+   * out from the explanation the way vanilla packs do: aqua for the thing you
+   * type, grey for the prose. The newline puts them on the two lines the pack
+   * list gives you.
+   */
+  function description(key) {
+    return '§b' + key + '\n§7Adds one font, for use in dialog text';
+  }
+
   function packMeta(entry) {
     return JSON.stringify({
       pack: {
-        description: entry.key + ' — font for Minecraft dialogs',
+        description: description(entry.key),
         pack_format: MIN_FORMAT,
         supported_formats: { min_inclusive: MIN_FORMAT, max_inclusive: MAX_FORMAT },
         min_format: MIN_FORMAT,

@@ -82,7 +82,7 @@ loading as new Minecraft versions come out and never needs editing:
 ```json
 {
   "pack": {
-    "description": "mypack:fancy — font for Minecraft dialogs",
+    "description": "§bmypack:fancy\n§7Adds one font, for use in dialog text",
     "pack_format": 63,
     "supported_formats": { "min_inclusive": 63, "max_inclusive": 999 },
     "min_format": 63,
@@ -90,6 +90,10 @@ loading as new Minecraft versions come out and never needs editing:
   }
 }
 ```
+
+The description takes the old `§` colour codes, so the font's name shows in
+aqua above a grey line of explanation — the two lines the resource pack list
+gives you.
 
 Both pairs are there deliberately. 1.21.9 replaced `pack_format` and
 `supported_formats` with `min_format` and `max_format`, but kept reading the
