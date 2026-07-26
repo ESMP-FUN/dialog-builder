@@ -123,6 +123,9 @@
         input.initial = entry.value;
         hooks.edited(input._id, true);
       });
+      // Clicking into the box has to show its options, but without a redraw —
+      // that would destroy the box being typed into.
+      entry.addEventListener('focus', function () { hooks.select(input._id); });
       entry.addEventListener('click', function (e) { e.stopPropagation(); });
       field.appendChild(entry);
       wrap.appendChild(field);
@@ -214,6 +217,9 @@
     track.addEventListener('pointerdown', function (e) {
       e.stopPropagation();
       e.preventDefault();
+      // Grabbing the slider counts as selecting it, so its options open even
+      // though the drag below suppresses the click that would normally do it.
+      hooks.select(input._id);
       setFrom(e.clientX);
 
       function onMove(ev) { setFrom(ev.clientX); }
@@ -294,7 +300,8 @@
   function render(dialog, opts) {
     opts = opts || {};
     hooks = opts.hooks || {
-      edited: function () {}, move: function () {}, remove: function () {}
+      edited: function () {}, select: function () {},
+      move: function () {}, remove: function () {}
     };
 
     var info = Model.typeInfo(dialog.type);

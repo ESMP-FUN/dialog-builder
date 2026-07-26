@@ -696,16 +696,16 @@
     dom.stage.appendChild(Preview.render(state.dialog, {
       selectedId: state.selectedId,
       hooks: {
-        // A live control was used. Redraw the preview and the code, but leave
-        // the options panel alone so a half-typed value keeps its focus.
+        // A live control was used. `keepFocus` means the control is still
+        // being held or typed into, so only the cheap parts are refreshed;
+        // rebuilding the preview mid-gesture would pull the control out from
+        // under the pointer.
         edited: function (id, keepFocus) {
           if (keepFocus) { renderIssues(); renderCode(); save(); return; }
           state.selectedId = id;
-          drawStage();
-          renderIssues();
-          renderCode();
-          save();
+          render();
         },
+        select: selectOnly,
         move: nudge,
         remove: function (id) {
           Model.removeElement(state.dialog, id);
@@ -718,16 +718,7 @@
     return !state.selectedId || !!dom.stage.querySelector('[data-id="' + state.selectedId + '"]');
   }
 
-  function render() {
-    if (!drawStage()) {
-      state.selectedId = null;
-      drawStage();
-    }
-
-    buildPalette();
-    renderIssues();
-    renderCode();
-
+  function renderInspector() {
     Inspector.render(dom.inspector, state.dialog, state.selectedId, function (soft, selection) {
       if (arguments.length > 1) state.selectedId = selection;
       if (soft) {
@@ -740,6 +731,40 @@
       }
       render();
     });
+  }
+
+  /*
+   * Moves the selection without rebuilding the preview.
+   *
+   * Clicking straight into a live control — putting a caret in a text box,
+   * grabbing a slider — has to show that element's options, but redrawing the
+   * preview at that moment would replace the very node holding the pointer or
+   * the caret. So the highlight is moved in place and only the options panel
+   * is rebuilt.
+   */
+  function selectOnly(id) {
+    if (state.selectedId === id) return;
+    state.selectedId = id;
+
+    Array.prototype.forEach.call(dom.stage.querySelectorAll('.mc-el.is-selected'), function (node) {
+      node.classList.remove('is-selected');
+    });
+    var node = id && dom.stage.querySelector('[data-id="' + id + '"]');
+    if (node) node.classList.add('is-selected');
+
+    renderInspector();
+  }
+
+  function render() {
+    if (!drawStage()) {
+      state.selectedId = null;
+      drawStage();
+    }
+
+    buildPalette();
+    renderIssues();
+    renderCode();
+    renderInspector();
 
     save();
   }
